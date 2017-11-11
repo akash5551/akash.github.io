@@ -1,0 +1,121 @@
+[training@localhost Desktop]$ zkServer.sh  start
+[training@localhost Desktop]$ zkCli.sh -server
+
+•	create
+1.	node
+[zk: localhost:2181(CONNECTED) 23] create /node abc
+Created /node
+2.	subnode
+[zk: localhost:2181(CONNECTED) 24] create /node/child child
+Created /node/child
+•	get
+[zk: localhost:2181(CONNECTED) 26] get /node               
+abc
+cZxid = 0xc
+ctime = Sun Jan 29 14:22:44 IST 2017
+mZxid = 0xc
+mtime = Sun Jan 29 14:22:44 IST 2017
+pZxid = 0xd
+cversion = 1
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 3
+numChildren = 1
+•	set
+[zk: localhost:2181(CONNECTED) 27] get /node               
+abc
+cZxid = 0xc
+ctime = Sun Jan 29 14:22:44 IST 2017
+mZxid = 0xc
+mtime = Sun Jan 29 14:22:44 IST 2017
+pZxid = 0xd
+cversion = 1
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 3
+numChildren = 1
+[zk: localhost:2181(CONNECTED) 28] set /node abc
+cZxid = 0xc
+ctime = Sun Jan 29 14:22:44 IST 2017
+mZxid = 0xe
+mtime = Sun Jan 29 14:24:54 IST 2017
+pZxid = 0xd
+cversion = 1
+dataVersion = 1
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 3
+numChildren = 1
+[zk: localhost:2181(CONNECTED) 29] get /node    
+abc
+cZxid = 0xc
+ctime = Sun Jan 29 14:22:44 IST 2017
+mZxid = 0xe
+mtime = Sun Jan 29 14:24:54 IST 2017
+pZxid = 0xd
+cversion = 1
+dataVersion = 1
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 3
+numChildren = 1
+•	rmr				deletes all nodes recursive
+[zk: localhost:2181(CONNECTED) 30] rmr /node
+[zk: localhost:2181(CONNECTED) 31] get /node
+Node does not exist: /node
+•	stat			meta information
+[zk: localhost:2181(CONNECTED) 35] create /node abc 
+Created /node
+[zk: localhost:2181(CONNECTED) 36] stat /node      
+cZxid = 0x11
+ctime = Sun Jan 29 14:26:41 IST 2017
+mZxid = 0x11
+mtime = Sun Jan 29 14:26:41 IST 2017
+pZxid = 0x11
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 3
+numChildren = 0
+•	delete
+[zk: localhost:2181(CONNECTED) 37] create /node/subnode child
+Created /node/subnode
+[zk: localhost:2181(CONNECTED) 38] delete /node/subnode      
+[zk: localhost:2181(CONNECTED) 39] get /node/subnode    
+Node does not exist: /node/subnode
+•	history
+[zk: localhost:2181(CONNECTED) 41] history
+31 - get /node
+32 - create /node
+33 - stat /node
+34 - create /node
+35 - create /node abc
+36 - stat /node
+37 - create /node/subnode child
+38 - delete /node/subnode 
+39 - get /node/subnode 
+40 - Watcher
+41 - history
+•	ls
+[zk: localhost:2181(CONNECTED) 42] ls /node
+[]
+•	listquota
+[zk: localhost:2181(CONNECTED) 44] listquota /node
+absolute path is /zookeeper/quota/node/zookeeper_limits
+quota for /node does not exist.
+•	redo
+[zk: localhost:2181(CONNECTED) 46] redo 45
+36 - stat /node
+37 - create /node/subnode child
+38 - delete /node/subnode 
+39 - get /node/subnode 
+40 - Watcher
+41 - history
+42 - ls /node
+43 - Watcher
+44 - listquota /node
+45 - history
+46 - history
