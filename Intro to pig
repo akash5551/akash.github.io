@@ -1,0 +1,290 @@
+•	Convention			structured-data -->> pig
+rdbms
+	Pig	symbol
+
+table
+	Relation or bag
+	{}
+
+
+Row	tuple
+	()
+
+column	atom
+	, seprated
+
+
+•	Local mode		FS-->PIg
+	Mapper
+•	load 
+		Syntax:
+			LOAD ‘path_of_data’ [USING function] [AS schema];
+
+•	default \t
+			a = load '/home/training/Desktop/pgstore/part-m-				00000' as (id:int,name:chararray);
+ 
+•	 generic using PigStorage('seprator')
+ a = load '/home/training/Desktop/pgstore/part-m-00000'        	using PigStorage(',')  as (id:int,name:chararray);
+ 
+
+•	order by
+syntax:
+	table2 = order table 1 by column_name <asc|desc>
+	bag2 = order bag1 by atom <asc|desc>
+•	single order by
+grunt> e = order a by id desc;      
+dump e;
+(20,rahjkm)
+(19,rahjkm)
+(18,rahjkm)
+(17,rahjkm)
+(16,rahjkm)
+(15,rahjkm)
+(14,rahjkm)
+(12,rahjkm)
+(11,rahjkm)
+(10,rahjkm)
+(9,rahjkm)
+(8,rahjkm)
+(7,rahjkm)
+(6,rahjkm)
+(5,rahjkm)
+(4,rahjkm)
+(2,ram)
+(1,raam)
+grunt> store e into '/home/training/Desktop/pgstore/comma/reducer4' ;
+ 
+•	multiple order by
+grunt> f = order a by id desc ,name desc;
+•	limit used to limit the no of tuples
+(1,raam)
+(2,ram)
+(4,rahjkm)
+(5,rahjkm)
+(6,rahjkm)
+grunt> d = limit a 5;
+•	filter
+grunt> b = filter a by id<10; 
+ 
+	using a script file
+` a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (id:int,name:chararray);
+b = FOREACH a GENERATE id;
+dump a;
+	
+ 
+	reducer
+•	group and count using foreach
+(ram,{(2,ram)})
+(raam,{(1,raam)})
+(rahjkm,{(12,rahjkm),(4,rahjkm),(5,rahjkm),(6,rahjkm),(7,rahjkm),(8,rahjkm),(9,rahjkm),(10,rahjkm),(11,rahjkm),(14,rahjkm),(15,rahjkm),(16,rahjkm),(17,rahjkm),(18,rahjkm),(19,rahjkm),(20,rahjkm)})
+grunt> l = group a by name;
+
+(ram,1)
+(raam,1)
+(rahjkm,16)
+grunt> k = FOREACH l GENERATE group,COUNT(a.name);
+ 
+•	operators part-m-00000
+grunt> a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (id:int,name:chararray); 
+part-m-00000
+1	raam
+2	ram
+4	rahjkm
+5	rahjkm
+6	rahjkm
+7	rahjkm
+8	rahjkm
+9	rahjkm
+10	rahjkm
+12	rahjkm
+11	rahjkm
+14	rahjkm
+15	rahjkm
+16	rahjkm
+17	rahjkm
+18	rahjkm
+19	rahjkm
+20	rahjkm
+		
+	
+	arithematic operators
+(1,raam,0)
+(2,ram,0)
+(4,rahjkm,0)
+(5,rahjkm,0)
+(6,rahjkm,0)
+(7,rahjkm,0)
+(8,rahjkm,0)
+(9,rahjkm,0)
+(10,rahjkm,0)
+(12,rahjkm,0)
+(11,rahjkm,0)
+(14,rahjkm,0)
+(15,rahjkm,0)
+(16,rahjkm,0)
+(17,rahjkm,0)
+(18,rahjkm,0)
+(19,rahjkm,0)
+(20,rahjkm,0)
+grunt> d = FOREACH a GENERATE id,name,id%id;
+ternary operator
+
+	casting operator using
+Positional parameter {($0,$1,$2)}
+(2)
+(3)
+(5)
+(6)
+(7)
+(8)
+(9)
+(10)
+(11)
+grunt> d = FOREACH b GENERATE (int)$0+1;
+	comparision operator
+==,<=,>=,!= and so on
+grunt> c = filter a by id >= 20;
+(20,rahjkm)
+grunt> b = filter a by id <= 10;  
+(1,raam)
+(2,ram)
+(4,rahjkm)
+(5,rahjkm)
+(6,rahjkm)
+(7,rahjkm)
+(8,rahjkm)
+(9,rahjkm)
+(10,rahjkm)
+	(1,raam)
+grunt> d = filter a by id == 1;
+<line 9, column 20> Operands of Regex can be CharArray only :(Name: Regex Type: null Uid: null)
+Details at logfile: /home/training/Desktop/pig_1484812086712.log
+grunt> d = filter a by (id matches '.*rahjkm.*');
+Input(s):
+Successfully read records from: "/home/training/Desktop/pgstore/default/part-m-00000"
+
+Output(s):
+Successfully stored records in: "file:/tmp/temp-306187668/tmp1652179631"
+d = filter a by name MATCHES '*rahjkm*';
+	derefrencing tuples
+use to select columns
+a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (id:int,name:chararray);
+b = FOREACH a GENERATE id;
+dump b;
+(1)
+(2)
+(4)
+(5)
+(6)
+(7)
+(8)
+(9)
+(10)
+(12)
+(11)
+(14)
+(15)
+(16)
+(17)
+(18)
+(19)
+(20)
+	disambiguite operator
+join operations
+grunt> b = load '/home/training/Desktop/pgstore/default/part-m-00000' as (x,y);
+grunt> a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (y,z)
+grunt> c = join a by y,b by x;
+grunt> d = foreach c generate a::y;
+dump d;
+(1)
+(2)
+(4)
+(5)
+(6)
+(7)
+(8)
+(9)
+(10)
+(12)
+(11)
+(14)
+(15)
+(16)
+(17)
+(18)
+(19)
+(20)
+
+	null operator
+grunt> a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (id:int,name:chararray);
+grunt> b = filter a by id is not null;
+
+	sign operators +,- has no effect on atom it will concatenate
+grunt> a = load '/home/training/Desktop/pgstore/default/part-m-00000' as (id:int,name:chararray);
+grunt> b = foreach a generate -id,name;
+grunt> dump b;
+(-1,raam)
+(-2,ram)
+(-4,rahjkm)
+(-5,rahjkm)
+(-6,rahjkm)
+(-7,rahjkm)
+(-8,rahjkm)
+(-9,rahjkm)
+(-10,rahjkm)
+(-12,rahjkm)
+(-11,rahjkm)
+(-14,rahjkm)
+(-15,rahjkm)
+(-16,rahjkm)
+(-17,rahjkm)
+(-18,rahjkm)
+(-19,rahjkm)
+(-20,rahjkm)
+	cross
+grunt> a = cross a,b;
+grunt> dump a;  
+(20,rahjkm,-11,rahjkm)
+(20,rahjkm,-14,rahjkm)
+(20,rahjkm,-15,rahjkm)
+(20,rahjkm,-16,rahjkm)
+(20,rahjkm,-17,rahjkm)
+(20,rahjkm,-18,rahjkm)
+(20,rahjkm,-19,rahjkm)
+(20,rahjkm,-20,rahjkm)
+	
+	
+	
+	
+	
+	
+	
+•	group and store
+grunt> c = group a by id;                                               
+grunt> c = store c into '/home/training/Desktop/pgstore/comma/reducer3' 
+>> ;
+key value pair
+K:key atom or ()
+V:bag  {}
+group by multiple atoms
+((1,raam),{(1,raam)})
+((2,ram),{(2,ram)})
+((4,rahjkm),{(4,rahjkm)})
+((5,rahjkm),{(5,rahjkm)})
+((6,rahjkm),{(6,rahjkm)})
+((7,rahjkm),{(7,rahjkm)})
+((8,rahjkm),{(8,rahjkm)})
+((9,rahjkm),{(9,rahjkm)})
+((10,rahjkm),{(10,rahjkm)})
+((11,rahjkm),{(11,rahjkm)})
+((12,rahjkm),{(12,rahjkm)})
+((14,rahjkm),{(14,rahjkm)})
+((15,rahjkm),{(15,rahjkm)})
+((16,rahjkm),{(16,rahjkm)})
+((17,rahjkm),{(17,rahjkm)})
+((18,rahjkm),{(18,rahjkm)})
+((19,rahjkm),{(19,rahjkm)})
+((20,rahjkm),{(20,rahjkm)})
+grunt> h = group a by (id,name);
+ 
+•	mapreduce mode			HDFS-->PIG
