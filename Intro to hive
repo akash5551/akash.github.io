@@ -1,0 +1,227 @@
+
+•	run hive
+[training@localhost Desktop]$ hive
+•	hive create a metastore
+-> Hive stores the schema of the Hive tables in a Hive Metastore. Metastore is used to hold all the information about the tables and partitions that are in the warehouse default path desktop
+ DDL Support
+•	CREATE
+1.	create database
+  
+hive> create database db;   
+OK
+Time taken: 3.55 seconds
+ 
+it will creat a warehouse for the database created
+default path in hdfs   /user/hive/warehouse
+ 
+2.	create table
+
+hive> create table emp(id int,name varchar(10))
+    > row format delimited                     
+    > fields terminated by ',';  
+
+ 
+
+3.	
+4.	
+
+
+•	 DROP
+•	 TRUNCATE    we can  truncate managed table
+•	ALTER
+hive> alter table emp 
+            rename to emp4;
+•	SHOW
+•	 DESCRIBE   
+DML queries   no update and delete
+Load
+	modes 
+	Local mode  path is local
+Syntax :
+LOAD data <LOCAL>inpath<file path> into table [tablename]
+
+	Mapreduce mode   default   path  is hdfs   /user/hive/warehouse
+Syntax :
+LOAD data  inpath<file path> into table [tablename]
+
+	Load the data 
+	hive> load data local inpath '/home/training/Desktop/emp' into table emp;
+hive> select * from emp;
+OK
+1	akash
+2	vishal
+ 
+	w/o overwrite
+hive> load data local inpath '/home/training/Desktop/emp' into table emp;
+hive> select * from emp;                                                 
+OK
+1	akash
+2	vishal
+1	akash
+2	vishal
+
+	with overwrite
+	hive> load data local inpath '/home/training/Desktop/emp' overwrite into table emp;
+hive> select * from emp;                                                           
+OK
+1	akash
+2	vishal
+•	run a hadoop job
+hive> select count(*) from emp;
+Total MapReduce CPU Time Spent: 4 seconds 160 msec
+OK
+2
+	insert
+Tables
+	internal table
+	
+hive> create table emp(id int,name varchar(10))
+    > row format delimited                     
+    > fields terminated by ',';  
+
+	external table	use external keyword  it stored in any hdfs path
+
+hive> create external table emp(id int,name varchar(10))
+    > row format delimited                     
+    > fields terminated by ','; 
+    > location '/hive/db/emp';  
+ 
+	Partition
+	w/o partition
+hive> create external table emp3(id int,name varchar(10))                            
+    > row format delimited              
+    > fields terminated by ',';
+	with partition
+hive> create external table emp3(id int)                            
+    > partitioned by (name varchar(10)) 
+    > row format delimited              
+    > fields terminated by ',';
+emp1.txt
+1,Anne,Admin,50000,A
+2,Gokul,Admin,50000,B
+3,Janet,Sales,60000,A
+4,Hari,Admin,50000,C
+5,Sanker,Admin,50000,C
+6,Margaret,Tech,12000,A
+7,Nirmal,Tech,12000,B
+8,jinju,Engineer,45000,B
+9,Nancy,Admin,50000,A
+10,Andrew,Manager,40000,A
+11,Arun,Manager,40000,B
+12,Harish,Sales,60000,B
+13,Robert,Manager,40000,A
+14,Laura,Engineer,45000,A
+15,Anju,Ceo,100000,B
+16,Aarathi,Manager,40000,B
+17,Parvathy,Engineer,45000,B
+18,Gopika,Admin,50000,B
+19,Steven,Engineer,45000,A
+20,Michael,Ceo,100000,A
+	non-partition table
+create external table UnPart_emp(EmployeeID Int,FirstName String,Designation  String,Salary Int,Department String) 
+row format delimited 
+fields terminated by "," 
+location  '/hive/db/employee';
+
+hive> create external table UnPart_emp(EmployeeID Int,FirstName String,Designation  String,Salary Int,Department String) 
+    > row format delimited 
+    > fields terminated by "," 
+    > location  '/hive/db/employee';
+OK
+Time taken: 1.381 seconds
+•	Load the data
+hive> load data local inpath '/home/training/Desktop/hive/emp.txt' into table UnPart_emp;
+
+hive> load data local inpath '/home/training/Desktop/hive/emp.txt' into table UnPart_emp;
+Copying data from file:/home/training/Desktop/hive/emp.txt
+Copying file: file:/home/training/Desktop/hive/emp.txt
+Loading data to table db.unpart_emp
+Table db.unpart_emp stats: [num_partitions: 0, num_files: 1, num_rows: 0, total_size: 480, raw_data_size: 0]
+OK
+Time taken: 1.269 seconds
+ 
+	partition table
+	
+create external table Part_emp(EmployeeID Int,FirstName String,Designation  String,Salary Int)
+partitioned by (Department String) 
+row format delimited 
+fields terminated by "," 
+location  '/hive/db/employee_part';	
+
+
+hive> 
+    > create external table Part_emp(EmployeeID Int,FirstName String,Designation  String,Salary Int)
+    > partitioned by (Department String) 
+    > row format delimited 
+    > fields terminated by "," 
+    > location  '/hive/db/employee_p art';
+OK
+Time taken: 0.054 seconds
+•	we can insert into two ways
+	static partition  insert into each partition		insert into
+ insert into table Part_emp  partition (department = 'A')
+     select EmployeeID,FirstName,Designation,Salary     
+    from UnPart_emp where department = 'A';
+insert into table Part_emp  partition (department = 'B')
+     select EmployeeID,FirstName,Designation,Salary     
+    from UnPart_emp where department = 'B';
+insert into table Part_emp  partition (department = 'C')
+     select EmployeeID,FirstName,Designation,Salary     
+    from UnPart_emp where department = 'C';
+
+ 
+	dynamic partition			
+	. set hive.exec.dynamic.partition=true
+	     This enable dynamic partitions, by default it is false.
+	2. set hive.exec.dynamic.partition.mode=nonstrict
+	     We are using the dynamic partition without a static
+	     partition (A table can be partitioned based    
+	     on multiple columns in hive) in such case we have to           
+	     enable the non strict mode. In strict mode we can use             
+	     dynamic partition  only with a Static Partition.
+	3. set hive.exec.max.dynamic.partitions.pernode=3
+	     The default value is 100, we have to modify the   
+	     same according to the possible no of partitions
+	4. hive.exec.max.created.files=150000
+	     The default values is 100000 but for larger tables  
+	     it can exceed the default, so we may have to update the same.
+
+
+
+hive> INSERT OVERWRITE TABLE Part_emp PARTITION(department) SELECT EmployeeID, FirstName,Designation,Salary,department FROM UnPart_emp;
+
+
+	partion on managed data 
+using alter table
+hive> alter table Part_emp  add partition(department = 'A')
+    > location '/hive/db/alter';
+
+	examples.txt
+1320352532	1001	http://www.mapr.com/doc	http://www.mapr.com	192.168.10.1
+1320352533	1002	http://www.mapr.com	http://www.example.com	192.168.10.10
+1320352546	1001	http://www.mapr.com	http://www.mapr.com/doc	192.168.10.1
+
+hive> create table weblogs(viewtime int,userid BigINT,url string,refer string,ip string)
+    > row format delimited
+    > fields terminated by '\t';
+
+
+hive> load data local inpath '/home/training/Desktop/hive/examples.txt'    overwrite  into table weblogs;
+
+	Buckets
+set hive.enforce.bucketing=true;
+use UnPart_emp;
+
+
+•	create partion bucket table
+
+create table emp_bucket (EmployeeID Int,FirstName String,Designation String,Salary Int,Department String) clustered by (department) into 3 buckets row format delimited fields terminated by ",";
+•	load the data into bucket table;
+hive> from UnPart_emp insert into table emp_bucket select employeeid,firstname,designation,salary;  
+ 
+ 
+ 
+	Create a table with same schema as another existing table
+hive> create table emp6 Like emp2;
+OK
+Time taken: 0.111 seconds
