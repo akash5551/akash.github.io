@@ -1,0 +1,212 @@
+•	list-databases
+[training@localhost Desktop]$ sqoop list-databases  --connect jdbc:mysql://localhost/db -username root -P
+ 
+•	list-tables
+[training@localhost Desktop]$ sqoop list-tables  --connect jdbc:mysql://localhost/db -username root -P
+
+ 
+•	ls hadoopdata
+[training@localhost Desktop]$ hadoop fs -ls -R /sqoopdata/
+Warning: $HADOOP_HOME is deprecated.
+
+ls: Cannot access -R: No such file or directory.
+Found 21 items
+drwxr-xr-x   - training supergroup          0 2017-01-16 12:36 /sqoopdata/bk_info
+drwxr-xr-x   - training supergroup          0 2017-01-16 12:38 /sqoopdata/bk_info1
+drwxr-xr-x   - training supergroup          0 2017-01-17 14:46 /sqoopdata/bk_info3
+drwxr-xr-x   - training supergroup          0 2017-01-17 14:56 /sqoopdata/bk_info4
+drwxr-xr-x   - training supergroup          0 2017-01-17 15:37 /sqoopdata/bk_info5
+drwxr-xr-x   - training supergroup          0 2017-01-18 11:19 /sqoopdata/bk_info6
+drwxr-xr-x   - training supergroup          0 2017-01-08 12:19 /sqoopdata/emp
+drwxr-xr-x   - training supergroup          0 2017-01-09 11:27 /sqoopdata/emp2
+drwxr-xr-x   - training supergroup          0 2017-01-09 11:29 /sqoopdata/new
+drwxr-xr-x   - training supergroup          0 2017-01-09 11:31 /sqoopdata/new1
+drwxr-xr-x   - training supergroup          0 2017-01-15 22:43 /sqoopdata/new10
+drwxr-xr-x   - training supergroup          0 2017-01-15 23:06 /sqoopdata/new11
+drwxr-xr-x   - training supergroup          0 2017-01-16 12:10 /sqoopdata/new12
+drwxr-xr-x   - training supergroup          0 2017-01-15 23:29 /sqoopdata/new13
+drwxr-xr-x   - training supergroup          0 2017-01-15 23:33 /sqoopdata/new14
+drwxr-xr-x   - training supergroup          0 2017-01-15 23:40 /sqoopdata/new15
+drwxr-xr-x   - training supergroup          0 2017-01-15 23:44 /sqoopdata/new16
+drwxr-xr-x   - training supergroup          0 2017-01-16 11:06 /sqoopdata/new17
+drwxr-xr-x   - training supergroup          0 2017-01-18 11:36 /sqoopdata/new19
+drwxr-xr-x   - training supergroup          0 2017-01-09 11:37 /sqoopdata/new3
+drwxr-xr-x   - training supergroup          0 2017-01-09 11:34 /sqoopdata/new4
+[training@localhost Desktop]$
+•	cat of a file
+[training@localhost Desktop]$ hadoop fs -cat /sqoopdata/new19/emp2/part-m-00000
+Warning: $HADOOP_HOME is deprecated.
+
+1,raam
+2,ram
+4,rahjkm
+5,rahjkm
+6,rahjkm
+7,rahjkm
+8,rahjkm
+9,rahjkm
+10,rahjkm
+12,rahjkm
+11,rahjkm
+14,rahjkm
+15,rahjkm
+16,rahjkm
+17,rahjkm
+18,rahjkm
+19,rahjkm
+20,rahjkm
+•	direct  mysql-->sqoop-->hdfs
+actual  jdbc-->sqoop-->hdfs	  	
+17/01/18 12:32:05 INFO mapreduce.ImportJobBase: Transferred 167 bytes in 20.8791 seconds (7.9984 bytes/sec)
+  fast data traversal 
+1.	10 mapper
+17/01/18 12:30:02 INFO mapreduce.ImportJobBase: Transferred 167 bytes in 52.1814 seconds (3.2004 bytes/sec)
+2.	1 mapper
+17/01/18 12:28:41 INFO mapreduce.ImportJobBase: Transferred 167 bytes in 23.0638 seconds (7.2408 bytes/sec)
+•	fetch size
+	5 records at a time
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --fetch-size=5 -warehouse-dir /sqoopdata/new28 -fields-terminated-by ','
+ 
+•	compression
+	default gzip extension .gz
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --target-dir /sqoopdata/new29 -z  -fields-terminated-by ',' -m 1
+ 
+•	formatting options
+	enclosed //,escaped"/",terminated , by
+������� �7���/J�������7C�����*a���
+ 
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --split-by id --boundary-query "select min(id),max(id) from emp2 where id>4 AND id <20 "  -warehouse-dir /sqoopdata/new30 -z  -fields-terminated-by ',' --enclosed-by // --escaped-by "/" -m 7
+•	sqoopcodegen
+
+•	sqoopmerge
+•	boundary query
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --split-by id --boundary-query "select min(id),max(id) from emp2"  -warehouse-dir /sqoopdata/new26 -fields-terminated-by ',' -m 10
+ 
+	with emp >4 and 20>emp
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --split-by id --boundary-query "select min(id),max(id) from emp2 where id>4 AND id <20 "  -warehouse-dir /sqoopdata/new25 -fields-terminated-by ',' -m 7
+ 
+•	eval			database-->sqoop
+		sqoop eval --connect jdbc:mysql://localhost/db --username root -P --query 			'select * from emp'
+			--------------------------------------
+| id          | name                 |
+--------------------------------------
+| 1           | raju                 |
+| 2           | ram                  |
+| 3           | hsdf                 |
+| 3           | hsdf                 |
+		"insert into emp values(4,'hsdf')"
+| id          | name                 |
+--------------------------------------
+| 1           | raju                 |
+| 2           | ram                  |
+| 3           | hsdf                 |
+| 3           | hsdf                 |
+| 4           | hsdf                 |
+	"any transaction"
+•	import			database-->sqoop-->hdfs
+   	Directory
+1.	default  user/training
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P -table emp2 -fields-terminated-by ',' -m 1
+/user/training/emp2/part-m-00000
+1,raam
+2,ram
+ 
+2.	warehouse  /sqoopdata
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new10  -fields-terminated-by ',' -m 1
+ 
+/sqoopdata/new10/emp2/part-m-00000
+1,raam
+2,ram
+
+
+3.	target dir
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 --target-dir /sqoopdata/new10  -fields-terminated-by ',' -m 1
+
+
+
+
+•	export			hdfs-->sqoop-->database
+ 		before
+			mysql> select * from emp2;
+			Empty set (0.00 sec)
+ 
+		[training@localhost Desktop]$ sqoop export --connect jdbc:mysql://localhost/db --username root -P -table emp2  -export-dir /sqoopdata/new10/emp2/part-m-00000  -fields-terminated-by ',' -m 1
+		after
+| id | name   |
++----+--------+
+|  1 | raam   |
+|  2 | ram    |
+|  4 | rahjkm |
+|  5 | rahjkm |
+|  6 | rahjkm |
+|  7 | rahjkm |
+|  8 | rahjkm |
+|  9 | rahjkm |
+| 10 | rahjkm |
+| 12 | rahjkm |
+| 11 | rahjkm |
+| 14 | rahjkm |
+| 15 | rahjkm |
+| 16 | rahjkm |
+| 17 | rahjkm |
+| 18 | rahjkm |
+| 19 | rahjkm |
+| 20 | rahjkm |
++----+--------+		
+•	option file
+ 
+[training@localhost Desktop]$ sqoop --options-file import.txt
+ 
+•	filter
+1.	Row
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new13 --where id=1  -fields-terminated-by ',' -m 1
+ 
+2.	column 
+•	with as textfile
+•	w/o any format
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new14 -columns id  -fields-terminated-by ',' -m 1
+ 
+•	Mappers 
+	means Controlling parallelism
+	w/o primary key use --split-by
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp1 --split-by id -warehouse-dir /sqoopdata/new21   -fields-terminated-by ',' -m 10
+ 
+	with primary key
+1.	default       4
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new16  -fields-terminated-by ',' 
+ 
+ 
+2.	10
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new15  -fields-terminated-by ',' -m 10
+ 
+3.	1,2,3
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db --username root -P  -table emp2 -warehouse-dir /sqoopdata/new15  -fields-terminated-by ',' -m (1| 2| 3)
+
+•	join 
+ 
+1.	default  1 mapper
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db -username root -P --query 'select book.bk_id, library.section, book.bk_name from book join library using (bk_id) WHERE $CONDITIONS' --target-dir /sqoopdata/bk_info  --fields-terminated-by  ‘,’  -m  1
+ 
+2.	multiple mapper 10 
+`	use split by
+[training@localhost Desktop]$ sqoop import  --connect jdbc:mysql://localhost/db -username root -P --query 'select book.bk_id, library.section, book.bk_name from book join library using (bk_id) WHERE $CONDITIONS' --split-by section --target-dir /sqoopdata/bk_info  --fields-terminated-by  ‘,’  -m  1
+
+	
+•	Incremental 
+1.	last modified
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db -username root -P -table book2 --check-column Date --incremental lastmodified --last-value 2013-00-00  --target-dir /sqoopdata/bk_info6  --fields-terminated-by ‘,’  -m  1
+ 
+2.	append
+[training@localhost Desktop]$ sqoop import --connect jdbc:mysql://localhost/db -username root -P -table book2 --check-column Date --incremental append --last-value 2010-00-00  --target-dir /sqoopdata/bk_info6  --fields-terminated-by ‘,’  -m  1
+ 
+•	import all tables
+db mysql database
+tables
+ 
+[training@localhost Desktop]$ sqoop import-all-tables --connect jdbc:mysql://localhost/db --username root -P   -warehouse-dir /sqoopdata/new11  -fields-terminated-by ',' -m 1 
+		
+Contents of directory /sqoopdata/new11
+emp
+emp1
+emp2
+ 
